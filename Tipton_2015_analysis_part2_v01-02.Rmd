@@ -55,7 +55,7 @@ all_samples <- readChangeoDb(paste0(directory, file[1]))
 ```
 
 ```{r}
-glimpse(all_samples)
+#glimpse(all_samples)
 ```
 # Plot sequecens for each isotype
 ```{r}
