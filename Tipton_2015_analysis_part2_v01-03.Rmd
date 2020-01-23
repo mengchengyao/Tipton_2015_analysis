@@ -224,7 +224,7 @@ for (i in selected_variables){
 #print(i)
 g1 <- db_props  %>%
     select(STATUS, ISOTYPE, !!as.name(i)) %>%
-    group_by(!!as.name(STATUS), !!as.name(ISOTYPE)) %>%
+    group_by(STATUS, ISOTYPE) %>%
     summarise(
     mean = mean(!!as.name(i)),
     se = sd(!!as.name(i))/sqrt(n())) %>%
@@ -250,7 +250,7 @@ for (i in selected_variables){
 #print(i)
 g1 <- db_props  %>%
     select(STATUS, ISOTYPE, !!as.name(i)) %>%
-    group_by(!!as.name(STATUS)) %>%
+    group_by(STATUS) %>%
     summarise(
     mean = mean(!!as.name(i)),
     se = sd(!!as.name(i))/sqrt(n())) %>%
@@ -274,7 +274,7 @@ for (i in selected_variables){
 #print(i)
 g1 <- db_props  %>%
     select(STATUS, ISOTYPE, !!as.name(i)) %>%
-    group_by(!!as.name(STATUS)) %>%
+    group_by(STATUS) %>%
     summarise(
     mean = mean(!!as.name(i)),
     se = sd(!!as.name(i))/sqrt(n())) %>%
@@ -298,7 +298,7 @@ for (i in selected_variables){
 #print(i)
 g1 <- db_props  %>%
     select(STATUS, ISOTYPE, !!as.name(i)) %>%
-    group_by(!!as.name(STATUS)) %>%
+    group_by(STATUS) %>%
     summarise(
     mean = mean(!!as.name(i)),
     se = sd(!!as.name(i))/sqrt(n())) %>%
@@ -322,7 +322,7 @@ for (i in selected_variables){
 #print(i)
 g1 <- db_props  %>%
     select(STATUS, ISOTYPE, !!as.name(i)) %>%
-    group_by(!!as.name(STATUS)) %>%
+    group_by(STATUS) %>%
     summarise(
     mean = mean(!!as.name(i)),
     se = sd(!!as.name(i))/sqrt(n())) %>%
@@ -365,7 +365,7 @@ family_plot <- ggplot(family, aes(x=GENE, y=CLONE_FREQ, fill = STATUS)) +
   facet_wrap( .~ ISOTYPE)
 
 plot(family_plot)
-ggsave(g1, filename = "Output/family_usage_by_ISO.png")
+ggsave(family_plot, filename = "Output/family_usage_by_ISO.png")
 
 family_plot <- ggplot(family, aes(x=GENE, y=CLONE_FREQ, fill = STATUS)) +
   tmp_theme +
@@ -378,13 +378,103 @@ family_plot <- ggplot(family, aes(x=GENE, y=CLONE_FREQ, fill = STATUS)) +
   #scale_color_brewer(palette="Set1") +
   #geom_point(aes(color=SUBSET), size=5, alpha=0.8) +
   geom_col(position=position_dodge(0.9)) +
-  scale_fill_manual(name="Subsets", values=cbPalette)
+  scale_fill_manual(name="Status", values=cbPalette)
 
 plot(family_plot)
-ggsave(g1, filename = "Output/family_usage_total.png")
+ggsave(family_plot, filename = "Output/family_usage_total.png")
+```
+
+# Compare VH4-34 expression
+
+```{r}
+db_props_copy %>% 
+    group_by(STATUS, ISOTYPE) %>%
+    count() %>%
+    knitr::kable()
+```
+
+```{r}
+iso_count <- db_props_copy %>% 
+    group_by(STATUS, ISOTYPE) %>%
+    summarise(
+        count = n()
+    )
+
+iso_count %>%
+    knitr::kable()
+```
+
+```{r}
+HC_IgA <- iso_count %>% 
+    filter(STATUS == 'HC') %>%
+    filter(ISOTYPE == 'IgA')
+#HC_IgA$count
+
+HC_IgD <- iso_count %>% 
+    filter(STATUS == 'HC') %>%
+    filter(ISOTYPE == 'IgD')
+#HC_IgD$count
+
+HC_IgG <- iso_count %>% 
+    filter(STATUS == 'HC') %>%
+    filter(ISOTYPE == 'IgG')
+#HC_IgG$count
+
+HC_IgM <- iso_count %>% 
+    filter(STATUS == 'HC') %>%
+    filter(ISOTYPE == 'IgM')
+#HC_IgM$count
+
+HC_total <- (HC_IgA$count + HC_IgD$count + HC_IgG$count + HC_IgM$count)
+
+SLE_IgA <- iso_count %>% 
+    filter(STATUS == 'SLE') %>%
+    filter(ISOTYPE == 'IgA')
+#SLE_IgA$count
+
+SLE_IgD <- iso_count %>% 
+    filter(STATUS == 'SLE') %>%
+    filter(ISOTYPE == 'IgD')
+#SLE_IgD$count
+
+SLE_IgG <- iso_count %>% 
+    filter(STATUS == 'SLE') %>%
+    filter(ISOTYPE == 'IgG')
+#SLE_IgG$count
+
+SLE_IgM <- iso_count %>% 
+    filter(STATUS == 'SLE') %>%
+    filter(ISOTYPE == 'IgM')
+#SLE_IgM$count
+
+SLE_total <- (SLE_IgA$count + SLE_IgD$count + SLE_IgG$count + SLE_IgM$count)
+```
+
+
+```{r}
+db <- db_props_copy %>%
+    select(STATUS, GERMLINE_V_CALL) %>%
+    filter( str_detect(GERMLINE_V_CALL, "4-34")) %>%
+    group_by(STATUS) %>%
+    summarise(
+        count = n()
+    ) %>%
+    mutate(
+        proportion = 
+            ifelse(STATUS == 'HC', count/HC_total*100,
+            ifelse(STATUS == 'SLE', count/SLE_total*100, NA
+                            ))
+    )
+
+    ggplot(db)+
+    aes( x = STATUS, y = proportion, fill = STATUS) +
+    geom_col()+
+    scale_fill_manual(name="Status", values=cbPalette) +
+    tmp_theme
+    
+#View(db)
 ```
 
 # Compare clonal diversity between HC and SLE
-
 
 # Compare clonal tree between HC and SLE
