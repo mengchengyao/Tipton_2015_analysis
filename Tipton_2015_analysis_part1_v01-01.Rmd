@@ -377,4 +377,193 @@ NGS data is deposited at the NCBI sequence read archive (SRA) study accession, S
     * Isotype
 * Fuse all the table in one master table
 * Run the rest of Immcantation pipeline on the master table
-    
+
+```{r}
+HC1  <- readChangeoDb("/Users/william/Documents/GitHub/GitHub_Data/Tipton_2015_SLE_vs_HC/AntibodyMap/HC/Tipton_2015_TET_Bulk_TET_subject_1_iglblastn_Bulk_db-pass.tab")
+```
+
+```{r}
+directory <- "/Users/william/Documents/GitHub/GitHub_Data/Tipton_2015_SLE_vs_HC/AntibodyMap/HC/"
+files <- dir(directory, pattern = "*.tab")
+```
+
+```{r}
+desired_length <- 4
+HC_list <- vector(mode = "list", length = desired_length)
+```
+
+
+```{r}
+# #https://stackoverflow.com/questions/33177118/append-a-data-frame-to-a-list
+# #https://stackoverflow.com/questions/17499013/how-do-i-make-a-list-of-data-frames
+# counter <- 1
+# for (i in files){ 
+#     file_path <- paste0(directory,i)
+#     #print(file_path) 
+#     HC_list[counter] <- list(readChangeoDb(file_path))
+#     counter <- counter + 1
+# }
+```
+
+```{r}
+#https://stackoverflow.com/questions/33177118/append-a-data-frame-to-a-list
+#https://stackoverflow.com/questions/17499013/how-do-i-make-a-list-of-data-frames
+counter <- 1
+for (i in files){ 
+    file_path <- paste0(directory,i)
+    #print(file_path) 
+    HC_list[counter] <- list(readChangeoDb(file_path))
+    HC_list[[counter]] <-  HC_list[[counter]] %>%
+        dplyr::mutate(
+            Donor = counter,
+            Status = "HC"
+        )
+    counter <- counter + 1
+}
+```
+
+```{r}
+#glimpse(empty_list)
+```
+
+```{r}
+#db <- empty_list[[1]]
+#View(db)
+```
+
+```{r}
+# #dir(directory, pattern = "*.tab")
+# file_path <- paste0(directory,"Tipton_2015_TET_Bulk_TET_subject_1_iglblastn_Bulk_db-pass.tab")
+# db <- readChangeoDb(file_path)
+# glimpse(db)
+```
+  
+```{r}
+HC <- HC_list[[1]]
+for (i in c(2:length(HC_list))){
+    #print(i)
+    HC <- bind_rows(HC, HC_list[[i]])
+}
+```
+ 
+```{r}
+#glimpse(HC_list[[4]])
+```
+ 
+```{r}
+#glimpse(HC)
+directory <- "/Users/william/Documents/GitHub/GitHub_Data/Tipton_2015_SLE_vs_HC/Immcantation/"
+writeChangeoDb(SLE, paste0(directory,"all_HC.tab"))
+```
+  
+```{r}
+directory <- "/Users/william/Documents/GitHub/GitHub_Data/Tipton_2015_SLE_vs_HC/AntibodyMap/SLE/"
+files <- dir(directory, pattern = "*.tab")
+#files
+```
+  
+```{r}
+desired_length <- length(files)
+SLE_list <- vector(mode = "list", length = desired_length)
+```
+
+```{r}
+counter <- 1
+for (i in files){ 
+    file_path <- paste0(directory,i)
+    #print(file_path) 
+    SLE_list[counter] <- list(readChangeoDb(file_path))
+    SLE_list[[counter]] <-  SLE_list[[counter]] %>%
+        dplyr::mutate(
+            Donor = counter,
+            Status = "SLE"
+        )
+    counter <- counter + 1
+}
+```
+  
+```{r}
+SLE <- SLE_list[[1]]
+for (i in c(2:length(SLE_list))){
+    #print(i)
+    SLE <- bind_rows(SLE, SLE_list[[i]])
+}
+```
+  
+```{r}
+#glimpse(SLE)
+directory <- "/Users/william/Documents/GitHub/GitHub_Data/Tipton_2015_SLE_vs_HC/Immcantation/"
+writeChangeoDb(SLE, paste0(directory,"all_SLE.tab"))
+```
+
+```{r}
+SLE <- SLE %>% filter(FUNCTIONAL == "TRUE")
+HC <- HC %>% filter(FUNCTIONAL == "TRUE")
+
+all_samples <- bind_rows(HC, SLE)
+directory <- "/Users/william/Documents/GitHub/GitHub_Data/Tipton_2015_SLE_vs_HC/Immcantation/"
+writeChangeoDb(all_samples, paste0(directory,"all_samples.tab"))
+```
+
+# Run the clonal analysis on combined dataset
+```{bash eval=FALSE}
+#######################
+# 4 Determine threshold
+#######################
+
+docker run -it -v /Users/william/Documents/GitHub/GitHub_Data/Tipton_2015_SLE_vs_HC/Immcantation:/data:z kleinstein/immcantation:2.7.0 bash
+cd data/
+ls
+>
+all_HC.tab  all_samples.tab  all_SLE.tab
+
+shazam-threshold -d all_HC.tab
+>
+THRESHOLD_AVG> 0.0674195
+
+shazam-threshold -d all_SLE.tab
+>
+THRESHOLD_AVG> 0.0674195
+
+shazam-threshold -d all_samples.tab 
+>
+THRESHOLD_AVG> 0.0592632
+```
+
+# Why is the threshold EXACTLY the same for SLE and HC?
+
+Check that the 2 df are different
+```{r}
+glimpse(HC)
+#View(HC)
+```
+
+```{r}
+glimpse(SLE)
+#View(SLE)
+```
+
+```{r}
+glimpse(all_samples)
+#View(all_samples)
+```
+
+Did not used parse select to remove non functional sequence but instead directly use dplyr.
+After verification it appears that the dataset are clearly differents
+
+```{bash eval=FALSE}
+####################
+# 5 Clonal threshold
+####################
+
+changeo-clone -d all_samples.tab -x 0.0592632
+
+>
+START
+   1: ParseDb select           14:01 01/22/20
+   2: DefineClones             14:01 01/22/20
+   3: CreateGermlines          14:05 01/22/20
+   4: ParseLog                 14:06 01/22/20
+   5: Compressing files        14:06 01/22/20
+DONE
+```
