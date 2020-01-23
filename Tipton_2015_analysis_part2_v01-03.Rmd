@@ -470,7 +470,8 @@ db <- db_props_copy %>%
     aes( x = STATUS, y = proportion, fill = STATUS) +
     geom_col()+
     scale_fill_manual(name="Status", values=cbPalette) +
-    tmp_theme
+    tmp_theme +
+    ggtitle('VH4-34 percentage')
     
 #View(db)
 ```
