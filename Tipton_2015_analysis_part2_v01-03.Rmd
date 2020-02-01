@@ -483,8 +483,36 @@ db <- db_props_copy %>%
 ```
 
 # Compare clonal diversity between HC and SLE
-See https://alakazam.readthedocs.io/en/stable/vignettes/Diversity-Vignette/
 
+## clonal abundance curve
+```{r}
+# Partitions the data on the SAMPLE column
+# Calculates a 95% confidence interval via 200 bootstrap realizations
+curve <- estimateAbundance(all_samples, group="STATUS", ci=0.95, nboot=200)
+# Plots a rank abundance curve of the relative clonal abundances
+sample_colors <- c("HC"="#999999", "SLE"="#E69F00")
+plot(curve, colors = sample_colors, legend_title="Sample")
+```
+
+## Diversity curve
+```{r echo = FALSE}
+# Compare diversity curve across values in the "STATUS" column
+# q ranges from 0 (min_q=0) to 4 (max_q=4) in 0.05 incriments (step_q=0.05)
+# A 95% confidence interval will be calculated (ci=0.95)
+# 200 resampling realizations are performed (nboot=200)
+sample_curve <- alphaDiversity(all_samples, group="STATUS",
+                               min_q=0, max_q=4, step_q=0.1,
+                               ci=0.95, nboot=200)
+```
+
+```{r}
+# Plot a log-log (log_q=TRUE, log_d=TRUE) plot of sample diversity
+# Indicate number of sequences resampled from each group in the title
+sample_main <- paste0("Sample diversity")
+sample_colors <- c("HC"="#999999", "SLE"="#E69F00")
+plot(sample_curve, colors=sample_colors, main_title=sample_main, 
+     legend_title="Diversity per health status")
+```
 
 
 # Compare clonal tree between HC and SLE
