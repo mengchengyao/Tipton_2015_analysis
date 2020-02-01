@@ -92,3 +92,9 @@ sample_colors <- c("HC"="#999999", "SLE"="#E69F00")
 plot(curve, colors = sample_colors, legend_title="Sample")
 ```
 
+```{r}
+# Estimate abundance by sample and plot
+abund <- estimateAbundance(ExampleDb, group="SAMPLE", nboot=100)
+plotAbundanceCurve(abund, legend_title="Sample")
+```
+
