@@ -44,6 +44,11 @@ cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2"
   # scale_colour_manual(values=cbPalette)
 ```
 
+For the first part of the analysis see: Tipton_2015_analysis_part1_v01-01.Rmd
+
+* Data processing with ChangeO
+* Clonal threshold analysis
+
 # Load Changeo processed table
 ```{r}
 directory <- "/Users/william/Documents/GitHub/GitHub_Data/Tipton_2015_SLE_vs_HC/Immcantation/all_samples/"
@@ -52,6 +57,7 @@ file <- dir(directory, pattern = "*.tab")
 
 ```{r}
 all_samples <- readChangeoDb(paste0(directory, file[1]))
+saveRDS(all_samples, "Output/R_object/all_samples_post_threshold.RDS")
 ```
 
 ```{r}
@@ -477,5 +483,10 @@ db <- db_props_copy %>%
 ```
 
 # Compare clonal diversity between HC and SLE
+See https://alakazam.readthedocs.io/en/stable/vignettes/Diversity-Vignette/
+
+
 
 # Compare clonal tree between HC and SLE
+
+

@@ -52,6 +52,10 @@ cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2"
 
 # Introduction
 
+    * Obtained data set from the Antibody Database
+    * Firt goal comapring physicco chemical properties of Lupus Ig compared to Health Control sequences
+
+
 # Docker Changeo Analysis
 
 1. Connect to Immcantation Docker in the Mac terminal
@@ -453,7 +457,7 @@ for (i in c(2:length(HC_list))){
 ```{r}
 #glimpse(HC)
 directory <- "/Users/william/Documents/GitHub/GitHub_Data/Tipton_2015_SLE_vs_HC/Immcantation/"
-writeChangeoDb(SLE, paste0(directory,"all_HC.tab"))
+writeChangeoDb(HC, paste0(directory,"all_HC.tab"))
 ```
   
 ```{r}
