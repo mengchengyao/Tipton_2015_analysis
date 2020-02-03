@@ -134,7 +134,7 @@ db %>%
 
 ```{r message=FALSE}
 directory <- "/Users/william/Documents/GitHub/Tipton_2015_analysis/Output/"
-title <- 'Isotype_count_per_health_status'
+title <- 'Isotype count per health status'
 file <- paste0(directory,title,'.png')
 
 bar <- ggplot(db)+
@@ -147,6 +147,35 @@ bar <- ggplot(db)+
 plot(bar)
 ggsave(bar, filename = file)
 ```
+
+```{r}
+db_HC <- db %>%
+    filter(STATUS == "HC")
+
+db_SLE <- db %>%
+    filter(STATUS == "SLE")
+
+HC <- ggplot(db_HC)+
+        aes(x = DONOR, fill = ISOTYPE) +
+        geom_bar(position = "fill", color='black') +
+        theme_bw() +
+        scale_fill_manual(name="Isotype", values=cbPalette)+
+        ggtitle('Isotype count healthy control subjects')
+
+SLE <- ggplot(db_SLE)+
+        aes(x = DONOR, fill = ISOTYPE) +
+        geom_bar(position = "fill", color='black') +
+        theme_bw() +
+        scale_fill_manual(name="Isotype", values=cbPalette)+
+        ggtitle('Isotype count SLE patients')
+
+plot(HC)
+ggsave(HC, filename = paste0(directory, 'Isotype count healthy control subjects' ,'.png'))
+plot(SLE)
+ggsave(SLE, filename = paste0(directory, 'Isotype count SLE patients' ,'.png'))
+```
+
+
 
 # Mutation analysis
 ```{r}
@@ -171,7 +200,7 @@ db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
 
 ```{r message=FALSE}
 # Plot mutation frequencies per subsets and isotypes
-title <- "Mutation frequency by subsets and isotypes"
+title <- "Mutation frequency by health status and isotypes"
 file <- paste0('Output/',title,'.png')
 
 boxplot <- ggplot(db_obs, aes(x=STATUS, y=MU_FREQ, fill=ISOTYPE)) +
@@ -368,7 +397,7 @@ family_plot <- ggplot(family, aes(x=GENE, y=CLONE_FREQ, fill = STATUS)) +
   #scale_color_brewer(palette="Set1") +
   #geom_point(aes(color=SUBSET), size=5, alpha=0.8) +
   geom_col(position=position_dodge(0.9)) +
-  scale_fill_manual(name="Subsets", values=cbPalette)+
+  scale_fill_manual(name="Status", values=cbPalette)+
   facet_wrap( .~ ISOTYPE)
 
 plot(family_plot)
@@ -545,7 +574,7 @@ db <- all_samples_isotype
 curve <- estimateAbundance(db, group="STATUS", ci=0.95, nboot=200)
 # Plots a rank abundance curve of the relative clonal abundances
 sample_colors <- c("HC"="#999999", "SLE"="#E69F00")
-plot(curve, colors = sample_colors, legend_title="Sample")
+plot(curve, colors = sample_colors, legend_title="Status")
 ```
 
 ## Diversity curve
@@ -598,7 +627,7 @@ db <- all_samples_isotype %>%
 # q ranges from 0 (min_q=0) to 4 (max_q=4) in 0.05 incriments (step_q=0.05)
 # A 95% confidence interval will be calculated (ci=0.95)
 # 200 resampling realizations are performed (nboot=200)
-sample_curve <- alphaDiversity(db, group="STATUS",
+sample_curve <- alphaDiversity(db, group="Status",
                                min_q=0, max_q=4, step_q=0.1,
                                ci=0.95, nboot=200)
 ```
@@ -620,7 +649,7 @@ db <- all_samples_isotype %>%
 # q ranges from 0 (min_q=0) to 4 (max_q=4) in 0.05 incriments (step_q=0.05)
 # A 95% confidence interval will be calculated (ci=0.95)
 # 200 resampling realizations are performed (nboot=200)
-sample_curve <- alphaDiversity(db, group="STATUS",
+sample_curve <- alphaDiversity(db, group="Status",
                                min_q=0, max_q=4, step_q=0.1,
                                ci=0.95, nboot=200)
 ```
@@ -641,7 +670,7 @@ db <- all_samples_isotype %>%
 # q ranges from 0 (min_q=0) to 4 (max_q=4) in 0.05 incriments (step_q=0.05)
 # A 95% confidence interval will be calculated (ci=0.95)
 # 200 resampling realizations are performed (nboot=200)
-sample_curve <- alphaDiversity(db, group="STATUS",
+sample_curve <- alphaDiversity(db, group="Status",
                                min_q=0, max_q=4, step_q=0.1,
                                ci=0.95, nboot=200)
 ```
